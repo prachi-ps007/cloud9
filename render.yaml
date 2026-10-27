@@ -1,0 +1,18 @@
+# Optional: Render "Blueprint". Render dashboard -> New -> Blueprint -> pick your repo.
+services:
+  - type: web
+    name: cloud9
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEMO_SEED
+        value: "true"
+      - key: DEMO_USERNAME
+        value: demo
+      - key: DEMO_PASSWORD
+        sync: false        # Render asks you for this value when you create the Blueprint
+      - key: ALLOW_REGISTRATION
+        value: "true"
+      - key: DEFAULT_STORAGE_LIMIT_GB
+        value: "1"
