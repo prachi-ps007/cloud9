@@ -10,7 +10,7 @@ export function requireFolder(userId, folderId) {
 }
 
 export function requireFile(userId, fileId) {
-  const file = db.prepare('SELECT * FROM files WHERE id = ? AND user_id = ?').get(fileId, userId);
+  const file = db.prepare('SELECT * FROM files WHERE id = ? AND user_id = ? AND deleted_at IS NULL').get(fileId, userId);
   if (!file) throw new AppError(404, 'File not found');
   return file;
 }
@@ -29,7 +29,7 @@ export function fileNameTaken(userId, folderId, name, ignoreId = null) {
   const row = db
     .prepare(
       `SELECT id FROM files
-       WHERE user_id = ? AND folder_id IS ? AND name = ? COLLATE NOCASE AND id IS NOT ?`
+       WHERE user_id = ? AND folder_id IS ? AND name = ? COLLATE NOCASE AND id IS NOT ? AND deleted_at IS NULL`
     )
     .get(userId, folderId, name, ignoreId);
   return !!row;
@@ -76,4 +76,5 @@ export const mapFile = (f) => ({
   size: f.size,
   createdAt: f.created_at,
   updatedAt: f.updated_at,
+  deletedAt: f.deleted_at ?? null,
 });

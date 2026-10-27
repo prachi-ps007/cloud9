@@ -9,6 +9,7 @@ import Files from './pages/Files.jsx';
 import Storage from './pages/Storage.jsx';
 import Devices from './pages/Devices.jsx';
 import Shares from './pages/Shares.jsx';
+import Trash from './pages/Trash.jsx';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/shared" element={<Shares />} />
         <Route path="/devices" element={<Devices />} />
         <Route path="/storage" element={<Storage />} />
+        <Route path="/trash" element={<Trash />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

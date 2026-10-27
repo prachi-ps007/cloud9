@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Cloud, FolderOpen, HardDrive, Link2, LogOut, QrCode, Smartphone } from 'lucide-react';
+import { Cloud, FolderOpen, HardDrive, Link2, LogOut, QrCode, Smartphone, Trash2 } from 'lucide-react';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { formatBytes } from '../util.js';
@@ -11,6 +11,7 @@ const nav = [
   { to: '/shared', label: 'Shared links', icon: Link2 },
   { to: '/devices', label: 'Devices', icon: Smartphone },
   { to: '/storage', label: 'Storage', icon: HardDrive },
+  { to: '/trash', label: 'Trash', icon: Trash2 },
 ];
 
 export default function Layout() {

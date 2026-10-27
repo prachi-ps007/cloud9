@@ -60,7 +60,7 @@ router.get('/', requireAuth, (req, res) => {
   const rows = db
     .prepare(
       `SELECT l.*, f.name AS file_name FROM share_links l JOIN files f ON f.id = l.file_id
-       WHERE l.user_id = ? ORDER BY l.created_at DESC`
+       WHERE l.user_id = ? AND f.deleted_at IS NULL ORDER BY l.created_at DESC`
     )
     .all(req.user.id);
   res.json({ links: rows.map((r) => mapLink(r, req)) });
@@ -85,7 +85,7 @@ function findValidLink(token) {
   const row = db
     .prepare(
       `SELECT l.*, f.name, f.size, f.mime_type, f.stored_name
-       FROM share_links l JOIN files f ON f.id = l.file_id WHERE l.token = ?`
+       FROM share_links l JOIN files f ON f.id = l.file_id WHERE l.token = ? AND f.deleted_at IS NULL`
     )
     .get(token);
   if (!row) throw new AppError(404, 'This link does not exist or was revoked');

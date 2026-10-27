@@ -42,7 +42,7 @@ router.get(
       .all(req.user.id, folderId);
     const files = db
       .prepare(
-        'SELECT * FROM files WHERE user_id = ? AND folder_id IS ? ORDER BY name COLLATE NOCASE'
+        'SELECT * FROM files WHERE user_id = ? AND deleted_at IS NULL AND folder_id IS ? ORDER BY name COLLATE NOCASE'
       )
       .all(req.user.id, folderId);
 
@@ -63,7 +63,7 @@ router.get(
     const like = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
     const files = db
       .prepare(
-        `SELECT * FROM files WHERE user_id = ? AND name LIKE ? ESCAPE '\\'
+        `SELECT * FROM files WHERE user_id = ? AND deleted_at IS NULL AND name LIKE ? ESCAPE '\\'
          ORDER BY updated_at DESC LIMIT 100`
       )
       .all(req.user.id, like);
@@ -80,7 +80,7 @@ router.get(
 // ---------- Recent files ----------
 router.get('/recent', (req, res) => {
   const files = db
-    .prepare('SELECT * FROM files WHERE user_id = ? ORDER BY created_at DESC LIMIT 20')
+    .prepare('SELECT * FROM files WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 20')
     .all(req.user.id);
   res.json({ files: files.map(mapFile) });
 });
@@ -165,6 +165,42 @@ router.post(
   })
 );
 
+// ---------- Trash / recovery ----------
+router.get('/trash', (req, res) => {
+  const files = db
+    .prepare('SELECT * FROM files WHERE user_id = ? AND deleted_at IS NOT NULL ORDER BY deleted_at DESC')
+    .all(req.user.id);
+  res.json({ files: files.map(mapFile) });
+});
+
+router.post('/:id/restore', asyncHandler(async (req, res) => {
+  const id = idSchema.parse(req.params.id);
+  const file = db.prepare('SELECT * FROM files WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL').get(id, req.user.id);
+  if (!file) throw new AppError(404, 'Trashed file not found');
+  if (!fs.existsSync(storedPath(req.user.id, file.stored_name))) {
+    throw new AppError(410, 'File data is missing on disk and cannot be restored');
+  }
+  const folder = file.folder_id === null ? null : db.prepare('SELECT id FROM folders WHERE id = ? AND user_id = ?').get(file.folder_id, req.user.id);
+  const folderId = folder ? file.folder_id : null;
+  const name = uniqueFileName(req.user.id, folderId, file.name);
+  db.prepare('UPDATE files SET deleted_at = NULL, folder_id = ?, name = ?, updated_at = ? WHERE id = ? AND user_id = ?')
+    .run(folderId, name, Date.now(), id, req.user.id);
+  res.json({ file: mapFile(db.prepare('SELECT * FROM files WHERE id = ? AND user_id = ?').get(id, req.user.id)) });
+}));
+
+router.delete('/:id/permanent', asyncHandler(async (req, res) => {
+  const id = idSchema.parse(req.params.id);
+  const file = db.prepare('SELECT * FROM files WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL').get(id, req.user.id);
+  if (!file) throw new AppError(404, 'Trashed file not found');
+  const remove = db.transaction(() => {
+    db.prepare('DELETE FROM share_links WHERE file_id = ? AND user_id = ?').run(id, req.user.id);
+    db.prepare('DELETE FROM files WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL').run(id, req.user.id);
+  });
+  remove();
+  safeUnlink(storedPath(req.user.id, file.stored_name));
+  res.json({ ok: true });
+}));
+
 // ---------- Download / preview ----------
 router.get(
   '/:id/download',
@@ -227,9 +263,10 @@ router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
     const file = requireFile(req.user.id, idSchema.parse(req.params.id));
-    db.prepare('DELETE FROM files WHERE id = ?').run(file.id);
-    safeUnlink(storedPath(req.user.id, file.stored_name));
-    res.json({ ok: true });
+    db.prepare('UPDATE files SET deleted_at = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NULL')
+      .run(Date.now(), Date.now(), file.id, req.user.id);
+    // Shared links become unusable while the file is in Trash.
+    res.json({ ok: true, trashed: true });
   })
 );
 

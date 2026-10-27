@@ -75,6 +75,13 @@ CREATE TABLE IF NOT EXISTS pairing_codes (
 );
 `);
 
+// Backward-compatible migration for existing CLOUD9 databases.
+const fileColumns = db.prepare('PRAGMA table_info(files)').all().map((column) => column.name);
+if (!fileColumns.includes('deleted_at')) {
+  db.exec('ALTER TABLE files ADD COLUMN deleted_at INTEGER');
+}
+db.exec('CREATE INDEX IF NOT EXISTS idx_files_trash ON files(user_id, deleted_at)');
+
 export function getSetting(key, fallback = null) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
   return row ? row.value : fallback;

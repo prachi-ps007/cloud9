@@ -131,6 +131,32 @@ test('upload, auto-rename duplicates, download, delete', async () => {
   assert.equal((await call('GET', `/files/${id}/download`)).status, 404);
 });
 
+test('Trash: deleted files can be restored or permanently removed', async () => {
+  const up = await upload('recover-me.txt', 'recovery contents');
+  assert.equal(up.status, 201);
+  const id = up.json.files[0].id;
+
+  const del = await call('DELETE', `/files/${id}`);
+  assert.equal(del.status, 200);
+  assert.equal(del.json.trashed, true);
+  assert.equal((await call('GET', `/files/${id}/download`)).status, 404);
+
+  const trash = await call('GET', '/files/trash');
+  assert.ok(trash.json.files.some((file) => file.id === id));
+
+  const restored = await call('POST', `/files/${id}/restore`);
+  assert.equal(restored.status, 200);
+  assert.equal(restored.json.file.name, 'recover-me.txt');
+  const download = await call('GET', `/files/${id}/download`, { raw: true });
+  assert.equal(await download.text(), 'recovery contents');
+
+  await call('DELETE', `/files/${id}`);
+  const permanent = await call('DELETE', `/files/${id}/permanent`);
+  assert.equal(permanent.status, 200);
+  assert.equal((await call('GET', '/files/trash')).json.files.some((file) => file.id === id), false);
+  assert.equal((await call('POST', `/files/${id}/restore`)).status, 404);
+});
+
 test('storage limit is enforced', async () => {
   const set = await call('PUT', '/storage/limit', { body: { limitGB: 0.000001 } }); // ~1 KB
   assert.equal(set.status, 200);
