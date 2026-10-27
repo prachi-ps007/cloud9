@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Cloud, FolderOpen, HardDrive, Link2, LogOut, QrCode, Smartphone, Trash2 } from 'lucide-react';
+import { Cloud, FolderOpen, HardDrive, Link2, LogOut, QrCode, Smartphone, Trash2, Waves } from 'lucide-react';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { formatBytes } from '../util.js';
 import PairPhoneModal from './PairPhoneModal.jsx';
 
 const nav = [
-  { to: '/', label: 'Files', icon: FolderOpen, end: true },
-  { to: '/shared', label: 'Shared links', icon: Link2 },
-  { to: '/devices', label: 'Devices', icon: Smartphone },
-  { to: '/storage', label: 'Storage', icon: HardDrive },
-  { to: '/trash', label: 'Trash', icon: Trash2 },
+  { to: '/', label: 'My files', short: 'Files', icon: FolderOpen, end: true },
+  { to: '/shared', label: 'Shared links', short: 'Shared', icon: Link2 },
+  { to: '/devices', label: 'Devices', short: 'Devices', icon: Smartphone },
+  { to: '/storage', label: 'Storage', short: 'Storage', icon: HardDrive },
+  { to: '/trash', label: 'Trash & recovery', short: 'Trash', icon: Trash2 },
 ];
 
 export default function Layout() {
@@ -24,90 +24,63 @@ export default function Layout() {
     api.get('/storage').then(setStorage).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    refreshStorage();
-  }, [refreshStorage, location.pathname]);
+  useEffect(() => { refreshStorage(); }, [refreshStorage, location.pathname]);
 
-  const link = ({ isActive }) =>
-    `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
-      isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'
-    }`;
+  const link = ({ isActive }) => `c9-nav-link ${isActive ? 'active' : ''}`;
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar (desktop) */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white p-4 md:flex">
-        <div className="mb-6 flex items-center gap-2 px-2 text-xl font-bold text-indigo-600">
-          <Cloud /> Cloud9
+    <div className="c9-app-shell">
+      <aside className="c9-sidebar">
+        <div className="c9-brand">
+          <span className="c9-brand-mark"><Waves size={23} /></span>
+          <span>cloud<span className="c9-brand-nine">9</span><small>YOUR LITTLE CLOUD BY THE SEA</small></span>
         </div>
-        <nav className="flex flex-col gap-1">
+        <div className="c9-side-label">YOUR SPACE</div>
+        <nav className="c9-nav">
           {nav.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={link}>
-              <n.icon size={18} /> {n.label}
+              <n.icon size={18} strokeWidth={1.9} /> <span>{n.label}</span>
+              {n.to === '/trash' && <span className="c9-nav-dot" />}
             </NavLink>
           ))}
-          <button
-            onClick={() => setPairOpen(true)}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
-          >
-            <QrCode size={18} /> Connect phone
+          <button onClick={() => setPairOpen(true)} className="c9-nav-link c9-connect">
+            <QrCode size={18} strokeWidth={1.9} /> <span>Connect phone</span>
           </button>
         </nav>
 
-        <div className="mt-auto space-y-4">
+        <div className="c9-sidebar-bottom">
           {storage && (
-            <div className="rounded-lg bg-slate-50 p-3">
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className={`h-full ${storage.usedPercent > 90 ? 'bg-red-500' : 'bg-indigo-500'}`}
-                  style={{ width: `${Math.max(storage.usedPercent, 1)}%` }}
-                />
-              </div>
-              <p className="mt-2 text-xs text-slate-500">
-                {formatBytes(storage.usedBytes)} of {formatBytes(storage.limitBytes)} used
-              </p>
+            <div className="c9-storage-card">
+              <div className="c9-storage-heading"><span>Cloud capacity</span><Cloud size={15} /></div>
+              <div className="c9-storage-track"><div className={`c9-storage-fill ${storage.usedPercent > 90 ? 'warning' : ''}`} style={{ width: `${Math.min(Math.max(storage.usedPercent, 1), 100)}%` }} /></div>
+              <p>{formatBytes(storage.usedBytes)} <span>of {formatBytes(storage.limitBytes)}</span></p>
             </div>
           )}
-          <div className="flex items-center justify-between px-2 text-sm">
-            <span className="truncate font-medium">{user.username}</span>
-            <button onClick={logout} title="Log out" className="rounded p-1.5 text-slate-500 hover:bg-slate-100">
-              <LogOut size={16} />
-            </button>
+          <div className="c9-user-row">
+            <div className="c9-avatar">{(user?.username || 'C').slice(0, 1).toUpperCase()}</div>
+            <div className="c9-user-info"><strong>{user.username}</strong><span>Beachside member</span></div>
+            <button onClick={logout} title="Log out" className="c9-logout"><LogOut size={17} /></button>
           </div>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 pb-20 md:pb-0">
-        {/* Top bar (mobile) */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
-          <span className="flex items-center gap-2 font-bold text-indigo-600">
-            <Cloud size={20} /> Cloud9
-          </span>
-          <button onClick={logout} className="text-slate-500" title="Log out">
-            <LogOut size={18} />
-          </button>
-        </div>
-        <div className="mx-auto max-w-5xl p-4 md:p-8">
+      <main className="c9-main">
+        <header className="c9-mobile-header">
+          <div className="c9-brand compact"><span className="c9-brand-mark"><Waves size={20} /></span><span>cloud<span className="c9-brand-nine">9</span></span></div>
+          <button onClick={logout} className="c9-logout" title="Log out"><LogOut size={18} /></button>
+        </header>
+        <div className="c9-page-wrap">
+          <div className="c9-welcome-strip"><span className="c9-sun">☀</span><span>A little sunshine for your files. Keep everything safe with CLOUD9.</span></div>
           <Outlet context={{ refreshStorage, openPair: () => setPairOpen(true) }} />
+          <footer className="c9-footer"><span>☼</span> CLOUD9 <i>·</i> YOUR FILES, YOUR HORIZON</footer>
         </div>
       </main>
 
-      {/* Bottom tabs (mobile) */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-200 bg-white md:hidden">
-        {nav.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            end={n.end}
-            className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${isActive ? 'text-indigo-600' : 'text-slate-500'}`
-            }
-          >
-            <n.icon size={20} /> {n.label.split(' ')[0]}
-          </NavLink>
-        ))}
+      <nav className="c9-mobile-nav">
+        {nav.map((n) => <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `c9-mobile-link ${isActive ? 'active' : ''}`}>
+          <n.icon size={19} /><span>{n.short}</span>
+        </NavLink>)}
       </nav>
-
       {pairOpen && <PairPhoneModal onClose={() => setPairOpen(false)} />}
     </div>
   );

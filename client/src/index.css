@@ -1,5 +1,98 @@
 @import "tailwindcss";
 
+:root {
+  --sand: #FFE4B9;
+  --seafoam: #C0ECB8;
+  --lagoon: #4ABBBD;
+  --lagoon: #4ABBBD;
+  --ocean: #1E80A0;
+  --bright-ocean: #0684E5;
+  --deep-sea: #0D2E92;
+  --ink: #173e59;
+  --muted: #6d8797;
+  --glass: rgba(255,255,255,.82);
+}
+
+* { box-sizing: border-box; }
+html { min-height: 100%; background: #eaf8f6; }
 body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(ellipse at 8% 3%, rgba(255,228,185,.9), transparent 31rem),
+    radial-gradient(ellipse at 92% 12%, rgba(74,187,189,.24), transparent 29rem),
+    radial-gradient(ellipse at 75% 90%, rgba(192,236,184,.5), transparent 34rem),
+    linear-gradient(145deg, #f5fcf9 0%, #e9f8f7 48%, #e5f2ff 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+
+.c9-app-shell { min-height: 100vh; }
+.c9-sidebar {
+  position: fixed; inset: 16px auto 16px 16px; z-index: 30; width: 258px;
+  display: flex; flex-direction: column; padding: 25px 17px 16px;
+  background: rgba(255,255,255,.78); border: 1px solid rgba(255,255,255,.92);
+  border-radius: 25px; box-shadow: 0 18px 55px rgba(23,86,112,.10); backdrop-filter: blur(18px);
+}
+.c9-brand { display: flex; align-items: center; gap: 11px; padding: 0 8px; color: var(--deep-sea); font-size: 24px; font-weight: 850; letter-spacing: -.9px; line-height: 1.05; }
+.c9-brand-mark { width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto; color: white; border-radius: 15px; background: linear-gradient(145deg, #4abbbd, #0684e5); box-shadow: 0 6px 14px #0684e52b; }
+.c9-brand-nine { color: var(--ocean); }
+.c9-brand small { display: block; margin-top: 5px; color: #7795a3; font-size: 8px; letter-spacing: 1.45px; font-weight: 750; }
+.c9-side-label { margin: 38px 10px 11px; color: #91a8b3; font-size: 10px; letter-spacing: 1.7px; font-weight: 800; }
+.c9-nav { display: flex; flex-direction: column; gap: 6px; }
+.c9-nav-link { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 45px; padding: 0 12px; color: #607b8b; background: transparent; border: 0; border-radius: 13px; text-decoration: none; font-size: 13px; font-weight: 650; transition: .18s ease; text-align: left; }
+.c9-nav-link:hover { color: var(--ocean); background: rgba(74,187,189,.11); transform: translateX(2px); }
+.c9-nav-link.active { color: #fff; background: linear-gradient(110deg, #1e80a0, #0684e5); box-shadow: 0 7px 17px rgba(6,132,229,.19); }
+.c9-nav-dot { width: 6px; height: 6px; margin-left: auto; border-radius: 50%; background: var(--sand); }
+.c9-sidebar-bottom { margin-top: auto; }
+.c9-storage-card { padding: 15px; border: 1px solid rgba(74,187,189,.18); border-radius: 17px; background: linear-gradient(145deg, rgba(192,236,184,.35), rgba(74,187,189,.08)); }
+.c9-storage-heading { display: flex; align-items: center; justify-content: space-between; color: #456e7d; font-size: 11px; font-weight: 750; margin-bottom: 12px; }
+.c9-storage-heading svg { color: var(--ocean); }
+.c9-storage-track { height: 7px; overflow: hidden; border-radius: 20px; background: rgba(30,128,160,.13); }
+.c9-storage-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4abbbd, #0684e5); }
+.c9-storage-fill.warning { background: #e99b4a; }
+.c9-storage-card p { margin: 9px 0 0; font-size: 11px; color: var(--ocean); font-weight: 800; }
+.c9-storage-card p span { color: #78919d; font-weight: 500; }
+.c9-user-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding: 10px 4px 0; }
+.c9-avatar { display: grid; place-items: center; width: 35px; height: 35px; flex: 0 0 auto; color: #7c5424; background: var(--sand); border-radius: 12px; font-weight: 850; }
+.c9-user-info { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 3px; }
+.c9-user-info strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; }
+.c9-user-info span { color: #8aa0aa; font-size: 10px; }
+.c9-logout { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 11px; background: transparent; color: #78919d; }
+.c9-logout:hover { color: #c65b4d; background: #fff0e9; }
+.c9-main { min-height: 100vh; margin-left: 290px; padding: 16px 22px 12px 0; }
+.c9-page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 14px; }
+.c9-welcome-strip { display: flex; align-items: center; gap: 9px; margin: 0 0 22px; padding: 11px 15px; border: 1px solid rgba(255,255,255,.9); border-radius: 15px; color: #5d7c87; background: rgba(255,255,255,.52); font-size: 11px; backdrop-filter: blur(10px); }
+.c9-sun { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px; color: #9b6c26; background: var(--sand); font-size: 17px; }
+.c9-footer { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 30px 0 8px; color: #92a9b1; font-size: 9px; font-weight: 800; letter-spacing: 1.7px; }
+.c9-footer span { color: #e5aa58; font-size: 16px; }
+.c9-footer i { font-style: normal; color: #4abbbd; }
+.c9-mobile-header, .c9-mobile-nav { display: none; }
+
+/* Give existing screens a consistent sea-glass finish without changing their logic. */
+.c9-main h1, .c9-main h2 { color: #173e59; letter-spacing: -.035em; }
+.c9-main input, .c9-main select, .c9-main textarea { border-color: #d5e8e9 !important; border-radius: 12px !important; }
+.c9-main input:focus, .c9-main select:focus, .c9-main textarea:focus { outline: 2px solid #4abbbd55; border-color: #4abbbd !important; }
+.c9-main .bg-white { background-color: rgba(255,255,255,.82); }
+.c9-main .border-slate-100, .c9-main .border-slate-200 { border-color: rgba(30,128,160,.14); }
+.c9-main .text-indigo-600, .c9-main .text-indigo-700 { color: #1e80a0; }
+.c9-main .bg-indigo-600, .c9-main .bg-indigo-500 { background-color: #1e80a0; }
+.c9-main .hover\:bg-indigo-700:hover { background-color: #0d2e92; }
+
+@media (max-width: 767px) {
+  .c9-sidebar { display: none; }
+  .c9-main { margin-left: 0; padding: 0 0 82px; }
+  .c9-mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 17px; border-bottom: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.72); backdrop-filter: blur(15px); }
+  .c9-brand.compact { gap: 8px; font-size: 21px; }
+  .c9-brand.compact .c9-brand-mark { width: 35px; height: 35px; border-radius: 12px; }
+  .c9-page-wrap { padding: 13px 14px 0; }
+  .c9-welcome-strip { align-items: flex-start; margin-bottom: 17px; font-size: 10px; line-height: 1.5; }
+  .c9-mobile-nav { position: fixed; inset: auto 9px 9px; z-index: 50; display: flex; gap: 2px; padding: 7px 4px; border: 1px solid rgba(255,255,255,.95); border-radius: 19px; background: rgba(255,255,255,.92); box-shadow: 0 10px 35px rgba(23,86,112,.18); backdrop-filter: blur(18px); }
+  .c9-mobile-link { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 1px; border-radius: 12px; color: #78919d; text-decoration: none; font-size: 9px; font-weight: 700; }
+  .c9-mobile-link.active { color: #fff; background: linear-gradient(145deg, #1e80a0, #0684e5); }
+  .c9-footer { margin-top: 24px; font-size: 8px; letter-spacing: 1.2px; }
 }
