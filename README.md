@@ -8,6 +8,8 @@ The project focuses on the essentials of a personal cloud: organize files into f
 > **Project status:** Student full-stack project / end-term submission  
 > **Deployment:** Designed to run as one Dockerized service and deployable to Render  
 > **Important storage note:** On hosts with ephemeral filesystems (including a default Render web service), uploaded files and the SQLite database may not survive restarts or redeploys unless persistent storage is configured.
+> Deployed link : https://cloud9-dkqa.onrender.com
+> Demo Video link : https://drive.google.com/file/d/1S-oNu0fU5fnS-Wayit6z59vqjsccTDYv/view?usp=sharing
 
 ---
 
